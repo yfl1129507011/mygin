@@ -1,26 +1,24 @@
 package fgin
 
 import (
-	"fmt"
 	"net/http"
 )
 
 // 定义处理路由的函数类型
-type HandlerFunc func(http.ResponseWriter, *http.Request)
+type HandlerFunc func(*Context)
 
 type Engine struct {
-	router map[string]HandlerFunc
+	router *router
 }
 
 func New() *Engine {
 	return &Engine{
-		router: make(map[string]HandlerFunc),
+		router: newRouter(),
 	}
 }
 
 func (e *Engine) addRoute(method string, pattern string, handler HandlerFunc) {
-	key := method + "-" + pattern
-	e.router[key] = handler
+	e.router.addRoute(method, pattern, handler)
 }
 
 func (e *Engine) GET(pattern string, handler HandlerFunc) {
@@ -36,10 +34,6 @@ func (e *Engine) Run(addr string) (err error) {
 }
 
 func (e *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	key := req.Method + "-" + req.URL.Path
-	if handler, ok := e.router[key]; ok {
-		handler(w, req)
-	} else {
-		fmt.Fprintf(w, "404 NOT FOUND: %s\n", req.URL)
-	}
+	c := newContext(w, req)
+	e.router.handle(c)
 }

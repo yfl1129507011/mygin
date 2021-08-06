@@ -2,15 +2,13 @@ package example
 
 import (
 	"fgin"
-	"fmt"
 	"net/http"
 )
 
 func RunHttp3() {
 	r := fgin.New()
-	r.GET("/", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "URL=%q\n", req.URL)
+	r.GET("/", func(c *fgin.Context) {
+		c.HTML(http.StatusOK, "<h1>fenlon, hello</h1>")
 	})
-
-	r.Run(":9998")
+	r.Run(":9990")
 }
